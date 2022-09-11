@@ -1,0 +1,74 @@
+{
+  "name": "sf-xp-debugger",
+  "version": "0.1.0",
+  "dependencies": {
+    "@salesforce-ux/design-system": "2.19",
+    "@salesforce/design-system-react": "^0.10.48",
+    "@types/har-format": "^1.2.8",
+    "@types/jest": "^24.0.13",
+    "@types/jsforce": "^1.9.43",
+    "@types/react": "^16.8.19",
+    "@types/react-dom": "^16.8.4",
+    "@types/webextension-polyfill": "^0.9.0",
+    "jsforce": "^1.11.0",
+    "logviewer": "https://gitpkg.now.sh/swisscat/debug-log-analyzer/log-viewer?main",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1",
+    "typescript": "^3.7.5",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "bestzip": "^2.2.1",
+    "cra-build-watch": "3.4",
+    "postinstall": "^0.7.4",
+    "serve": "^11.0.1"
+  },
+  "scripts": {
+    "watch": "cra-build-watch",
+    "start": "react-scripts start",
+    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
+    "serve": "serve -s build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "clean": "rm -rf build",
+    "prebuild": "npm run clean",
+    "prewatch": "npm run clean",
+    "postinstall": "postinstall",
+    "zip": "bestzip extension.zip dist/*"
+  },
+  "postinstall": {
+    "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css": "link public/lib/",
+    "@salesforce-ux/design-system/assets/icons": "link public/lib/",
+    "webextension-polyfill/dist/browser-polyfill.min.*": "link public/lib/"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "homepage": "https://github.com/swisscat/sf-xp-debugger",
+  "bugs": {
+    "url": "https://github.com/swisscat/sf-xp-debugger/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swisscat/sf-xp-debugger"
+  },
+  "keywords": [
+    "chrome",
+    "extension",
+    "typescript",
+    "react",
+    "salesforce"
+  ],
+  "author": "Etienne Favre",
+  "license": "ISC"
+}
