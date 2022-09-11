@@ -35,7 +35,7 @@
     "prebuild": "npm run clean",
     "prewatch": "npm run clean",
     "postinstall": "postinstall",
-    "zip": "bestzip extension.zip dist/*"
+    "zip": "bestzip extension.zip build/*"
   },
   "postinstall": {
     "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css": "link public/lib/",
