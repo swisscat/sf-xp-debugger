@@ -1,1 +1,1 @@
-chrome.devtools.panels.create('XP Profiler', null, 'index.html');
+chrome.devtools.panels.create('XP Profiler', 'icon.png', 'index.html');

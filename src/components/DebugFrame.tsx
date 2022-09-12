@@ -1,4 +1,4 @@
-import { Button, Modal } from "@salesforce/design-system-react";
+import { Button, Modal, Spinner } from "@salesforce/design-system-react";
 import { Connection, SfDate } from "jsforce";
 import React, { Component, RefObject } from "react";
 import { Browser } from "webextension-polyfill";
@@ -14,11 +14,17 @@ interface Props {
 
 interface State {
   isOpen: boolean;
+  frameHeight: string;
+  isDownloading: boolean;
+  isLoaded: boolean;
 }
 
 export default class DebugFrame extends Component<Props> {
   state: State = {
     isOpen: false,
+    frameHeight: "0px",
+    isDownloading: false,
+    isLoaded: false,
   };
   private iframeRef: RefObject<HTMLIFrameElement>;
   constructor(props: Props) {
@@ -83,19 +89,26 @@ export default class DebugFrame extends Component<Props> {
     }
 
     const iframe = this.iframeRef.current;
-    return iframe && iframe.contentWindow
-      ? iframe.contentWindow.postMessage(
-          {
-            command: "streamLog",
-            name: apexName,
-            data: log.raw,
-          },
-          "*"
-        )
-      : null;
+    iframe?.contentWindow?.postMessage(
+      {
+        command: "streamLog",
+        name: apexName,
+        data: log.raw,
+      },
+      "*"
+    );
+
+    this.setState({
+      isLoaded: true,
+    });
   }
-  async downloadLog() {
+  downloadLog = async () => {
     const { apexName } = this.props;
+
+    this.setState({
+      isDownloading: true,
+    });
+
     const log = await this.getLogData();
 
     if (!log) {
@@ -104,26 +117,58 @@ export default class DebugFrame extends Component<Props> {
 
     const url = URL.createObjectURL(new Blob([log.raw], { type: "application/octet-stream" }));
     await browser.downloads.download({ url, filename: apexName + ".log" });
-  }
+
+    this.setState({
+      isDownloading: false,
+    });
+  };
+  closeFrame = () => {
+    this.setState({ isOpen: false, isLoaded: false });
+  };
   render() {
-    const { isOpen } = this.state;
+    const { isOpen, frameHeight, isDownloading, isLoaded } = this.state;
+
     return (
       <Modal
         isOpen={isOpen}
         ariaHideApp={false}
-        onRequestClose={() => {
-          this.setState({ isOpen: false });
-        }}
+        onRequestClose={this.closeFrame}
         containerClassName="debug-frame-container"
+        footer={[
+          <Button key="1" iconCategory="utility" iconName="close" iconPosition="left" label="Close" onClick={this.closeFrame} />,
+          <Button
+            key="2"
+            disabled={isDownloading ? true : null}
+            iconCategory="utility"
+            iconName="download"
+            iconPosition="left"
+            label={
+              <p>
+                Download
+                {isDownloading && <Spinner size="small" variant="brand" />}
+              </p>
+            }
+            variant="brand"
+            onClick={this.downloadLog}
+          />,
+        ]}
       >
-        <Button label="Download log" onClick={() => this.downloadLog()} />
+        {!isLoaded && <Spinner size="large" variant="brand" />}
         <iframe
           ref={this.iframeRef}
           title="TraceViewer"
           src="traceViewer/index.html"
+          scrolling="no"
+          height={frameHeight}
+          width="100%"
           style={{
             width: "100%",
-            height: "500px",
+            overflow: "auto",
+          }}
+          onLoad={() => {
+            this.setState({
+              frameHeight: this.iframeRef.current?.contentWindow?.document.body.scrollHeight + "px",
+            });
           }}
         />
       </Modal>

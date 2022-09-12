@@ -2,7 +2,6 @@ import { Spinner, Toast, ToastContainer } from "@salesforce/design-system-react"
 import React, { Component } from "react";
 import { Browser } from "webextension-polyfill";
 import DebugInformation from "./components/DebugInformation";
-import TraceReminder from "./components/TraceReminder";
 import ManageTrace from "./components/ManageTrace";
 import RequestStack from "./components/RequestStack";
 import Tabs from "./layout/Tabs";
@@ -57,7 +56,7 @@ class App extends Component<Props, AppState> {
     }
 
     const sessionId = salesforceSessionCookie.value;
-    const sfApi = new Connection({ instanceUrl: `https://${instanceUrl}`, sessionId, version: "56.0" });
+    const sfApi = new Connection({ instanceUrl: `https://${instanceUrl}`, sessionId, version: "55.0" });
 
     let externalUser;
 
@@ -116,8 +115,7 @@ class App extends Component<Props, AppState> {
     return (
       <Tabs appName="XP Profiler">
       <div data-label="Debug">
-        <TraceReminder traceActiveUntil={traceActiveUntil} />
-        <RequestStack sfApi={sfApi} hasActiveTrace={!!traceActiveUntil} />
+        <RequestStack sfApi={sfApi} traceActiveUntil={traceActiveUntil} />
       </div>
         <div data-label="Configuration">
           <div className="slds-box">

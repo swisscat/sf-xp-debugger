@@ -1,4 +1,4 @@
-import { Button, Card } from "@salesforce/design-system-react";
+import { Button, Card, DataTable, DataTableCell, DataTableColumn, Icon } from "@salesforce/design-system-react";
 import { Entry } from "har-format";
 import { Connection } from "jsforce";
 import React, { Component } from "react";
@@ -8,7 +8,7 @@ declare var browser: Browser;
 
 interface Props {
   sfApi: Connection;
-  hasActiveTrace: boolean;
+  traceActiveUntil?: Date;
 }
 
 interface SalesforceRequest {
@@ -84,7 +84,7 @@ export default class RequestStack extends Component<Props> {
     stack: [],
   };
   async componentDidMount() {
-    const { sfApi, hasActiveTrace } = this.props;
+    const { sfApi, traceActiveUntil } = this.props;
     const { stack: storedStack } = await browser.storage.local.get("stack");
 
     const stack = storedStack || [];
@@ -92,11 +92,12 @@ export default class RequestStack extends Component<Props> {
     this.setState({ stack });
 
     browser.devtools.network.onRequestFinished.addListener(async (request: unknown) => {
+      const { stack } = this.state;
       const entry = request as Entry;
       const endDate = new Date();
 
       const messageParam = (((entry.request.postData || {}).params || []).find((param) => param.name === "message") || {}).value;
-      const requestIdHeader = (entry.request.headers.find((header) => header.name === "x-sfdc-request-id") || {}).value;
+      const requestIdHeader = (entry.request.headers.find((header) => header.name.toLowerCase() === "x-sfdc-request-id") || {}).value;
 
       if (entry.request.url.indexOf("s/sfsites/aura") === -1 || !entry.request.queryString.find((param) => param.name === "aura.ApexAction.execute")) {
         return;
@@ -137,7 +138,7 @@ export default class RequestStack extends Component<Props> {
         logs: [],
       };
 
-      if (hasActiveTrace) {
+      if (!!traceActiveUntil) {
         const logs = (await sfApi.sobject("ApexLog").find({ RequestIdentifier: `TID:${requestIdHeader}` }, ["Id"])) as Array<{ Id: string }>;
         item.logs = logs.map((item) => item.Id);
       }
@@ -173,38 +174,56 @@ export default class RequestStack extends Component<Props> {
   renderStackChildren(stack: Array<SalesforceRequest>) {
     const { sfApi } = this.props;
     const { showLog, inspectDate } = this.state;
+
+    const ViewTraceTableCell = ({ ...props }) => (
+      <DataTableCell {...props}>
+        <a
+          href="#"
+          onClick={() =>
+            this.setState({
+              showLog: {
+                requestId: props.request,
+                itemId: props.item.id,
+              },
+              inspectDate: new Date(),
+            })
+          }
+        >
+          View Trace
+        </a>
+      </DataTableCell>
+    );
+    ViewTraceTableCell.displayName = DataTableCell.displayName;
     return (
       <div className="slds-box">
         <div className="slds-grid slds-gutters">
           {stack.map((item) => (
             <div className="slds-col" key={item.requestId}>
-              <Card heading={item.requestId} bodyClassName="slds-card__body_inner">
-                {item.items.map((rq) => (
-                  <p key={rq.id}>
-                    {rq.name} - total ${rq.total} - db ${rq.db}
-                    {item.logs.length && (
-                      <Button
-                        label="Get log"
-                        onClick={() =>
-                          this.setState({
-                            showLog: {
-                              requestId: item.requestId,
-                              itemId: rq.id,
-                            },
-                            inspectDate: new Date(),
-                          })
-                        }
-                      />
-                    )}
+              <Card heading={`APEX: ${item.items.length} requests`} icon={<Icon category="standard" name="apex" size="small" />}>
+                <DataTable items={item.items}>
+                  <DataTableColumn key="name" label="Controller" property="name" />
+                  <DataTableColumn key="total" label="Total" property="total" />
+                  <DataTableColumn key="db" label="Database" property="db" />
+                  <DataTableColumn key="id" label="" property="id">
+                    <ViewTraceTableCell request={item.requestId} />
+                  </DataTableColumn>
+                </DataTable>
+                {inspectDate &&
+                  item.items.map((rq) => (
                     <DebugFrame
+                      key={item.requestId + rq.id}
                       logs={item.logs}
                       apexName={rq.name}
                       inspectDate={showLog && showLog.requestId === item.requestId && showLog.itemId === rq.id ? inspectDate : undefined}
                       sfApi={sfApi}
                     />
-                  </p>
-                ))}
-                {item.children.length ? this.renderStackChildren(item.children) : ""}
+                  ))}
+                {!!item.children.length && (
+                  <div className="slds-card__body slds-card__body_inner">
+                    <p className="slds-text-heading_small slds-truncate slds-m-bottom_small" title="APEX: 1 requests">Sub-requests</p>
+                    {this.renderStackChildren(item.children)}
+                  </div>
+                )}
               </Card>
             </div>
           ))}
@@ -214,6 +233,7 @@ export default class RequestStack extends Component<Props> {
   }
 
   render() {
+    const { traceActiveUntil } = this.props;
     const { stack } = this.state;
 
     if (!stack.length) {
@@ -222,8 +242,13 @@ export default class RequestStack extends Component<Props> {
 
     return (
       <div>
-        <Button label="Flush stack" onClick={() => this.flushStack()} />
         {this.renderStackChildren(stack)}
+        <div className="slds-docked-form-footer">
+          <div className="slds-button slds-text-body_regular slds-text-color_weak">
+            {traceActiveUntil ? `Trace active until ${traceActiveUntil.toLocaleString()}` : `Trace not enabled`} &bull;
+          </div>
+          <Button label="Flush logs" onClick={() => this.flushStack()} />
+        </div>
       </div>
     );
   }

@@ -1,5 +1,5 @@
 .debug-frame-container {
     max-width: unset;
-    height: unset;
     width:100%;
+    padding: .5rem;
 }
