@@ -1,6 +1,8 @@
 import { Alert, AlertContainer } from "@salesforce/design-system-react";
 import React, { Component } from "react";
+import { Browser, browserAction } from "webextension-polyfill";
 import "./TraceReminder.css";
+declare var browser: Browser;
 
 interface Props {
   traceActiveUntil?: Date;
@@ -12,13 +14,22 @@ interface State {
 
 export default class TraceReminder extends Component<Props> {
   state: State = {
-    isOpen: true,
+    isOpen: false,
+  };
+  async componentDidMount() {
+    const {traceReminderDismissed} = await browser.storage.local.get("traceReminderDismissed");
+
+    if (!traceReminderDismissed) {
+      this.setState({
+        isOpen: true,
+      });
+    }
   }
   componentDidUpdate(prevProps: Readonly<Props>): void {
     if (this.props.traceActiveUntil !== prevProps.traceActiveUntil) {
       this.setState({
-        isOpen: true
-      })
+        isOpen: true,
+      });
     }
   }
   render() {

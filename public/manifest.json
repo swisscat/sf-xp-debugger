@@ -7,6 +7,6 @@
   },
   "manifest_version": 3,
   "devtools_page": "devtools.html",
-  "permissions": ["cookies", "tabs", "activeTab"],
+  "permissions": ["cookies", "tabs", "activeTab", "downloads", "storage"],
   "host_permissions": ["<all_urls>"]
 }

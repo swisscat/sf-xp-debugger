@@ -83,9 +83,14 @@ export default class RequestStack extends Component<Props> {
   state: State = {
     stack: [],
   };
-  componentDidMount() {
+  async componentDidMount() {
     const { sfApi, hasActiveTrace } = this.props;
-    const { stack } = this.state;
+    const { stack: storedStack } = await browser.storage.local.get("stack");
+
+    const stack = storedStack || [];
+
+    this.setState({ stack });
+
     browser.devtools.network.onRequestFinished.addListener(async (request: unknown) => {
       const entry = request as Entry;
       const endDate = new Date();
@@ -155,7 +160,14 @@ export default class RequestStack extends Component<Props> {
       this.setState({
         stack,
       });
+
+      browser.storage.local.set({ stack: stack });
     });
+  }
+
+  flushStack() {
+    browser.storage.local.remove("stack");
+    this.setState({ stack: [] });
   }
 
   renderStackChildren(stack: Array<SalesforceRequest>) {
@@ -170,18 +182,20 @@ export default class RequestStack extends Component<Props> {
                 {item.items.map((rq) => (
                   <p key={rq.id}>
                     {rq.name} - total ${rq.total} - db ${rq.db}
-                    <Button
-                      label="Get log"
-                      onClick={() =>
-                        this.setState({
-                          showLog: {
-                            requestId: item.requestId,
-                            itemId: rq.id,
-                          },
-                          inspectDate: new Date(),
-                        })
-                      }
-                    />
+                    {item.logs.length && (
+                      <Button
+                        label="Get log"
+                        onClick={() =>
+                          this.setState({
+                            showLog: {
+                              requestId: item.requestId,
+                              itemId: rq.id,
+                            },
+                            inspectDate: new Date(),
+                          })
+                        }
+                      />
+                    )}
                     <DebugFrame
                       logs={item.logs}
                       apexName={rq.name}
@@ -201,14 +215,16 @@ export default class RequestStack extends Component<Props> {
 
   render() {
     const { stack } = this.state;
-    const { sfApi } = this.props;
-
-    //return <DebugFrame logs={["07L7Z00000WmrRlUAJ"]} apexName="B2B_LCC_POSAccess.getMaisonPOSAccess" inspectDate={new Date()} sfApi={sfApi} />;
 
     if (!stack.length) {
       return <div></div>;
     }
 
-    return <div>{this.renderStackChildren(stack)}</div>;
+    return (
+      <div>
+        <Button label="Flush stack" onClick={() => this.flushStack()} />
+        {this.renderStackChildren(stack)}
+      </div>
+    );
   }
 }

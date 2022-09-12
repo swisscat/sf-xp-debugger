@@ -1,7 +1,9 @@
-import { Modal } from "@salesforce/design-system-react";
-import { Connection } from "jsforce";
+import { Button, Modal } from "@salesforce/design-system-react";
+import { Connection, SfDate } from "jsforce";
 import React, { Component, RefObject } from "react";
+import { Browser } from "webextension-polyfill";
 import "./DebugFrame.css";
+declare var browser: Browser;
 
 interface Props {
   logs: Array<string>;
@@ -32,22 +34,14 @@ export default class DebugFrame extends Component<Props> {
       this.viewIframeLog();
     }
   }
-  async viewIframeLog() {
-    const { sfApi, logs, apexName, inspectDate } = this.props;
-
-    if (!inspectDate) {
-      return;
-    }
-
-    this.setState({
-      isOpen: true,
-    });
+  async getLogData() {
+    const { sfApi, logs, apexName } = this.props;
 
     for (const logId of logs) {
-      const log = await sfApi.sobject("ApexLog").retrieve(logId, ["Id"]);
+      let log = await sfApi.sobject("ApexLog").retrieve(logId, ["Id", "CreatedDate"]);
 
       if (!log || !log.attributes) {
-        return;
+        return null;
       }
 
       const response = await fetch(`${sfApi.instanceUrl}${log.attributes.url}/Body`, {
@@ -61,21 +55,55 @@ export default class DebugFrame extends Component<Props> {
         continue;
       }
 
-      const rawLog = await response.text();
+      const raw = await response.text();
 
-      if (rawLog.indexOf(apexName) === -1) {
+      if (raw.indexOf(apexName) === -1) {
         continue;
       }
 
-      const iframe = this.iframeRef.current;
-      return iframe && iframe.contentWindow
-        ? iframe.contentWindow.postMessage({
+      return { log, raw };
+    }
+
+    return null;
+  }
+  async viewIframeLog() {
+    const { apexName, inspectDate } = this.props;
+    if (!inspectDate) {
+      return;
+    }
+
+    this.setState({
+      isOpen: true,
+    });
+
+    const log = await this.getLogData();
+
+    if (!log) {
+      return;
+    }
+
+    const iframe = this.iframeRef.current;
+    return iframe && iframe.contentWindow
+      ? iframe.contentWindow.postMessage(
+          {
             command: "streamLog",
             name: apexName,
-            data: rawLog,
-          }, "*")
-        : null;
+            data: log.raw,
+          },
+          "*"
+        )
+      : null;
+  }
+  async downloadLog() {
+    const { apexName } = this.props;
+    const log = await this.getLogData();
+
+    if (!log) {
+      return;
     }
+
+    const url = URL.createObjectURL(new Blob([log.raw], { type: "application/octet-stream" }));
+    await browser.downloads.download({ url, filename: apexName + ".log" });
   }
   render() {
     const { isOpen } = this.state;
@@ -88,6 +116,7 @@ export default class DebugFrame extends Component<Props> {
         }}
         containerClassName="debug-frame-container"
       >
+        <Button label="Download log" onClick={() => this.downloadLog()} />
         <iframe
           ref={this.iframeRef}
           title="TraceViewer"
