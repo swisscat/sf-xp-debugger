@@ -177,20 +177,22 @@ export default class RequestStack extends Component<Props> {
 
     const ViewTraceTableCell = ({ ...props }) => (
       <DataTableCell {...props}>
-        <a
-          href="#"
-          onClick={() =>
-            this.setState({
-              showLog: {
-                requestId: props.request,
-                itemId: props.item.id,
-              },
-              inspectDate: new Date(),
-            })
-          }
-        >
-          View Trace
-        </a>
+        {props.logs && (
+          <a
+            href="#"
+            onClick={() =>
+              this.setState({
+                showLog: {
+                  requestId: props.request,
+                  itemId: props.item.id,
+                },
+                inspectDate: new Date(),
+              })
+            }
+          >
+            View Trace
+          </a>
+        )}
       </DataTableCell>
     );
     ViewTraceTableCell.displayName = DataTableCell.displayName;
@@ -205,7 +207,7 @@ export default class RequestStack extends Component<Props> {
                   <DataTableColumn key="total" label="Total" property="total" />
                   <DataTableColumn key="db" label="Database" property="db" />
                   <DataTableColumn key="id" label="" property="id">
-                    <ViewTraceTableCell request={item.requestId} />
+                    <ViewTraceTableCell request={item.requestId} logs={!!item.logs.length} />
                   </DataTableColumn>
                 </DataTable>
                 {inspectDate &&
@@ -220,7 +222,9 @@ export default class RequestStack extends Component<Props> {
                   ))}
                 {!!item.children.length && (
                   <div className="slds-card__body slds-card__body_inner">
-                    <p className="slds-text-heading_small slds-truncate slds-m-bottom_small" title="APEX: 1 requests">Sub-requests</p>
+                    <p className="slds-text-heading_small slds-truncate slds-m-bottom_small" title="APEX: 1 requests">
+                      Sub-requests
+                    </p>
                     {this.renderStackChildren(item.children)}
                   </div>
                 )}
