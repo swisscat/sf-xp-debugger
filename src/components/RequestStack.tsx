@@ -96,8 +96,8 @@ export default class RequestStack extends Component<Props> {
       const entry = request as Entry;
       const endDate = new Date();
 
-      const messageParam = (((entry.request.postData || {}).params || []).find((param) => param.name === "message") || {}).value;
-      const requestIdHeader = (entry.request.headers.find((header) => header.name.toLowerCase() === "x-sfdc-request-id") || {}).value;
+      const messageParam = entry.request.postData?.params?.find((param) => param.name === "message")?.value;
+      const requestIdHeader = entry.request.headers.find((header) => header.name.toLowerCase() === "x-sfdc-request-id")?.value;
 
       if (entry.request.url.indexOf("s/sfsites/aura") === -1 || !entry.request.queryString.find((param) => param.name === "aura.ApexAction.execute")) {
         return;

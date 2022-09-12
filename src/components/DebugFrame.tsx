@@ -46,7 +46,7 @@ export default class DebugFrame extends Component<Props> {
     for (const logId of logs) {
       let log = await sfApi.sobject("ApexLog").retrieve(logId, ["Id", "CreatedDate"]);
 
-      if (!log || !log.attributes) {
+      if (!log?.attributes?.url) {
         return null;
       }
 

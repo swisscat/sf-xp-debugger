@@ -32,7 +32,7 @@ export default class UserInfo extends Component<Props, UserInfoState> {
     const { label } = this.props;
     const { user } = this.state;
     return (
-      <LoadingCard loaded={!!user} heading={user? user.Name : ''} avatar={user? user.FullPhotoUrl : ''}>
+      <LoadingCard loaded={!!user} heading={user?.Name} avatar={user?.FullPhotoUrl}>
         {label}
       </LoadingCard>
     );

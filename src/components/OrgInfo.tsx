@@ -31,8 +31,8 @@ export default class OrgInfo extends Component<Props, UserInfoState> {
   render() {
     const { org } = this.state;
     return (
-      <LoadingCard loaded={!!org} heading={`Instance ${org? org.Name : ''} (${org && org.IsSandbox ? "Sandbox" : "PRODUCTION"})`}>
-        {org? org.InstanceName : ''} - Type: {org? org.OrganizationType : ''}
+      <LoadingCard loaded={!!org} heading={`Instance ${org?.Name} (${org?.IsSandbox ? "Sandbox" : "PRODUCTION"})`}>
+        {org?.InstanceName} - Type: {org?.OrganizationType}
       </LoadingCard>
     );
   }

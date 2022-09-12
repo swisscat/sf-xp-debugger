@@ -14,7 +14,7 @@
     "logviewer": "https://gitpkg.now.sh/swisscat/debug-log-analyzer/log-viewer?main",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1",
+    "react-scripts": "3.3",
     "typescript": "^3.7.5",
     "webextension-polyfill": "^0.10.0"
   },
