@@ -156,8 +156,8 @@ export default class DebugFrame extends Component<Props> {
         {!isLoaded && <Spinner size="large" variant="brand" />}
         <iframe
           ref={this.iframeRef}
-          title="TraceViewer"
-          src="traceViewer/index.html"
+          title="LogViewer"
+          src="lib/logviewer/index.html"
           scrolling="no"
           height={frameHeight}
           width="100%"

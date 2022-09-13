@@ -7,15 +7,13 @@ The extension is developed as cross-browser, but has been only tested on Chrome.
 It makes use of https://github.com/financialforcedev/debug-log-analyzer to display log information.
 
 ![Request Example](assets/request-example.png "Request Example")
+![Request Example](assets/stack-example.png "Stack Example")
 
 ## Installation
  * Download repository
  * `npm install`
- * `npm run watch`
+ * `npm run build`
  * Load extension as unpacked from the `build` folder
-## TODO
-* Remove public/traceViewer folder (replace with actual dependency)
-
 ## Icon
 
 Agent icons created by Freepik - Flaticon: https://www.flaticon.com/free-icons/agent
