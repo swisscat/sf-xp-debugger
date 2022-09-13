@@ -1,5 +1,5 @@
 import { Button, Modal, Spinner } from "@salesforce/design-system-react";
-import { Connection, SfDate } from "jsforce";
+import { Connection } from "jsforce";
 import React, { Component, RefObject } from "react";
 import { Browser } from "webextension-polyfill";
 import "./DebugFrame.css";

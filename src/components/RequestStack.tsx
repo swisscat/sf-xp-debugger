@@ -179,7 +179,7 @@ export default class RequestStack extends Component<Props> {
       <DataTableCell {...props}>
         {props.logs && (
           <a
-            href="#"
+            href="#cell"
             onClick={() =>
               this.setState({
                 showLog: {
