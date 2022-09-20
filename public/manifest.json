@@ -1,12 +1,19 @@
 {
   "name": "Salesforce Experience Cloud Debugger",
   "description": "This light debugging tool provides view on APEX request tree to understand application bottlenecks",
-  "version": "1.0",
+  "version": "1.2",
   "icons": {
     "128": "icon.png"
   },
   "manifest_version": 3,
   "devtools_page": "devtools.html",
-  "permissions": ["cookies", "tabs", "activeTab", "downloads", "storage"],
-  "host_permissions": ["<all_urls>"]
+  "permissions": [
+    "cookies",
+    "downloads",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
 }
