@@ -38,7 +38,7 @@
     "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css": "link public/lib/",
     "@salesforce-ux/design-system/assets/icons": "link public/lib/",
     "webextension-polyfill/dist/browser-polyfill.min.*": "link public/lib/",
-    "logviewer/out": "copy public/lib/"
+    "logviewer/out/*": "copy public/lib/logviewer/"
   },
   "browserslist": {
     "production": [
