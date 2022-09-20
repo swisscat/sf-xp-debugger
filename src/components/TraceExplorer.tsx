@@ -10,6 +10,7 @@ declare var browser: Browser;
 interface Props {
   sfApi: Connection;
   traceActiveUntil?: Date;
+  onLocationChange: Function;
 }
 
 interface Trace {
@@ -172,8 +173,10 @@ export default class TraceExplorer extends Component<Props> {
     browser.storage.local.set({ traceList });
   };
   reloadListener() {
+    const { onLocationChange } = this.props;
     this.initUrlChangeListener();
     this.initTraceList();
+    onLocationChange();
   }
   messageListener(message: any) {
     if (message.type === 'urlChange') {

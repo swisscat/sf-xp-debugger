@@ -50,6 +50,11 @@ class App extends Component<Props, AppState> {
 
     const [currentLocation] = await browser.devtools.inspectedWindow.eval("location.href");
 
+    const currentLocationUrl = new URL(currentLocation);
+    this.setState({
+      currentDomain: currentLocationUrl.hostname
+    })
+
     const loggedAsCookie = await browser.cookies.get({ name: "RRetURL", url: currentLocation });
 
     if (loggedAsCookie === null) {
@@ -121,7 +126,7 @@ class App extends Component<Props, AppState> {
     });
   }
   render() {
-    const { error, externalUserId, traceActiveUntil, sfApi } = this.state;
+    const { error, externalUserId, currentDomain, traceActiveUntil, sfApi } = this.state;
 
     if (error) {
       return (
@@ -134,9 +139,9 @@ class App extends Component<Props, AppState> {
     }
 
     return (
-      <Tabs appName="XP Profiler">
+      <Tabs appName={`${currentDomain} - XP Profiler`}>
         <div data-label="Debug">
-          <TraceExplorer sfApi={sfApi} traceActiveUntil={traceActiveUntil} />
+          <TraceExplorer sfApi={sfApi} traceActiveUntil={traceActiveUntil} onLocationChange={() => this.bootstrapApp()} />
         </div>
         <div data-label="Configuration">
           <div className="slds-box">
