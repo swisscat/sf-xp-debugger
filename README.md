@@ -1,6 +1,10 @@
 # sf-xp-debugger
 
-This cross-browser extension provides capability to debug traces directly in the browser developer tools for Experience Cloud Websites.
+Cross-browser extension providing capability to debug traces directly in the browser developer tools for Experience Cloud Websites.
+
+## [:pushpin: Add to Chrome](https://chrome.google.com/webstore/detail/salesforce-experience-clo/gbhgnplfajpgpdiflbpfllfolnamcnac)
+
+[![Build Status](https://app.travis-ci.com/swisscat/sf-xp-debugger.svg?branch=master)](https://app.travis-ci.com/swisscat/sf-xp-debugger)
 
 The extension is developed as cross-browser, but has been only tested on Chrome.
 
@@ -8,6 +12,8 @@ It makes use of https://github.com/financialforcedev/debug-log-analyzer to displ
 
 ![Request Example](assets/request-example.png "Request Example")
 ![Request Example](assets/stack-example.png "Stack Example")
+
+## Development
 
 ## Installation
  * Download repository
