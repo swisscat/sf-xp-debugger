@@ -72,6 +72,7 @@ interface State {
     itemId: string;
   };
   inspectDate?: Date;
+  domain: string;
 }
 
 const allNodes = (stack: Array<SalesforceRequest>): Array<SalesforceRequest> => {
@@ -89,6 +90,7 @@ const allNodes = (stack: Array<SalesforceRequest>): Array<SalesforceRequest> => 
 export default class TraceExplorer extends Component<Props> {
   state: State = {
     traceList: [],
+    domain: "none"
   };
   constructor(props: Props) {
     super(props);
@@ -97,9 +99,27 @@ export default class TraceExplorer extends Component<Props> {
     this.reloadListener = this.reloadListener.bind(this);
     this.messageListener = this.messageListener.bind(this);
   }
+  getStorageKey(domain: string): string {
+    return `traceList.${domain}`;
+  }
+  async getBrowserStorage (domain: string): Promise<Array<Trace>> {
+    const storageKey = this.getStorageKey(domain);
+    const storage = await browser.storage.local.get(storageKey);
+
+    return storage[storageKey] || [];
+  }
+  async setBrowserStorage(domain: string, traceList: Array<Trace>) {
+    const storage: {[key: string]: Array<Trace>} = {};
+    storage[this.getStorageKey(domain)] = traceList;
+    console.log('storing', storage);
+    return browser.storage.local.set(storage);
+  }
+  deleteBrowserStorage(domain?: string) {
+    domain && browser.storage.local.remove(this.getStorageKey(domain))
+  } 
   requestListener = async (request: unknown) => {
     const { traceActiveUntil, sfApi } = this.props;
-    const { traceList } = this.state;
+    const { traceList, domain } = this.state;
     const entry = request as Entry;
     const endDate = new Date();
     const trace = traceList[traceList.length - 1];
@@ -170,7 +190,7 @@ export default class TraceExplorer extends Component<Props> {
       traceList,
     });
 
-    browser.storage.local.set({ traceList });
+    this.setBrowserStorage(domain, traceList);
   };
   reloadListener() {
     const { onLocationChange } = this.props;
@@ -183,19 +203,23 @@ export default class TraceExplorer extends Component<Props> {
       this.initTraceList();
     }
   }
-  async initTraceList() {
-    const { traceList: storedTraceList } = await browser.storage.local.get("traceList");
+  async initTraceList(flush: boolean = false) {
+    const [currentLocationBrowser] = await browser.devtools.inspectedWindow.eval("location.href");
+    const currentLocation = new URL(currentLocationBrowser);
+    const domain = currentLocation.hostname;
 
-    const traceList = storedTraceList || [];
+    if (flush) {
+      await this.deleteBrowserStorage(domain);
+    }
 
-    const [currentLocation] = await browser.devtools.inspectedWindow.eval("location.href.substring(location.origin.length)");
+    const traceList = await this.getBrowserStorage(domain);
 
     traceList.push({
-      url: currentLocation,
+      url: currentLocation.href.substring(currentLocation.origin.length),
       stack: []
     })
 
-    this.setState({ traceList });
+    this.setState({ traceList, domain });
   }
   initUrlChangeListener(initRequestListener: boolean = false) {
     if (initRequestListener) {
@@ -220,11 +244,6 @@ export default class TraceExplorer extends Component<Props> {
     browser.devtools.network.onRequestFinished.removeListener(this.requestListener);
     browser.devtools.network.onNavigated.removeListener(this.reloadListener);
     browser.runtime.onMessage.removeListener(this.messageListener);
-  }
-
-  flushStack() {
-    browser.storage.local.remove("traceList");
-    this.initTraceList();
   }
 
   renderStackChildren(stack: Array<SalesforceRequest>) {
@@ -305,7 +324,7 @@ export default class TraceExplorer extends Component<Props> {
         <div className="slds-button slds-text-body_regular slds-text-color_weak">
           {traceActiveUntil ? `Trace active until ${traceActiveUntil.toLocaleString()}` : `Trace not enabled`} &bull;
         </div>
-        <Button label="Flush logs" onClick={() => this.flushStack()} />
+        <Button label="Flush logs" onClick={() => this.initTraceList(true)} />
       </div>
     </>
   }

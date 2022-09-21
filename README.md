@@ -17,6 +17,3 @@ It makes use of https://github.com/financialforcedev/debug-log-analyzer to displ
 ## Icon
 
 Agent icons created by Freepik - Flaticon: https://www.flaticon.com/free-icons/agent
-
-## TODO
- * Check what happens when changing domain
