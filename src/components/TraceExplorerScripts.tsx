@@ -26,7 +26,7 @@ export function sendMessageOnNavigationEvent() {
   const _browser = chrome || browser;
 
   if (!_browser) {
-    throw "Could not find the browser API"
+    throw new Error("Could not find the browser API");
   }
 
   if (document._sendMessageConfigured) {

@@ -1,4 +1,4 @@
-import { Modal, Spinner, Toast, ToastContainer } from "@salesforce/design-system-react";
+import { Modal, Spinner } from "@salesforce/design-system-react";
 import React, { Component, ReactNode } from "react";
 import { Browser, Cookies } from "webextension-polyfill";
 import DebugInformation from "./components/DebugInformation";
@@ -27,9 +27,6 @@ interface AppState {
 
 class App extends Component<Props, AppState> {
   state: AppState = {};
-  constructor(props: any) {
-    super(props);
-  }
   cookieChangeListener = ({ cookie }: Cookies.OnChangedChangeInfoType) => {
     if (["RRetURL", "sid"].includes(cookie.name)) {
       this.bootstrapApp();
