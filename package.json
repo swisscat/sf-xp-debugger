@@ -22,15 +22,16 @@
     "bestzip": "^2.2.1",
     "cra-build-watch": "3.4",
     "postinstall": "^0.7.4",
-    "serve": "^11.0.1"
+    "serve": "^11.0.1",
+    "web-ext": "^7.2.0"
   },
   "scripts": {
-    "watch": "cra-build-watch",
-    "start": "react-scripts start",
-    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
+    "dev:chrome": "cra-build-watch",
+    "dev:firefox": "copy public-ff/* build && web-ext run",
+    "build:chrome": "INLINE_RUNTIME_CHUNK=false react-scripts build",
+    "build:firefox": "INLINE_RUNTIME_CHUNK=false react-scripts build && copy public-ff/* build",
     "serve": "serve -s build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "postinstall": "postinstall",
     "zip": "bestzip extension.zip build/*"
   },
@@ -51,6 +52,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "webExt": {
+    "verbose": true,
+    "sourceDir": "build"
   },
   "bugs": {
     "url": "https://github.com/swisscat/sf-xp-debugger/issues"

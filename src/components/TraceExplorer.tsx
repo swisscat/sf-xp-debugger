@@ -111,7 +111,6 @@ export default class TraceExplorer extends Component<Props> {
   async setBrowserStorage(domain: string, traceList: Array<Trace>) {
     const storage: {[key: string]: Array<Trace>} = {};
     storage[this.getStorageKey(domain)] = traceList;
-    console.log('storing', storage);
     return browser.storage.local.set(storage);
   }
   deleteBrowserStorage(domain?: string) {
@@ -194,7 +193,7 @@ export default class TraceExplorer extends Component<Props> {
   };
   reloadListener() {
     const { onLocationChange } = this.props;
-    this.initUrlChangeListener();
+    this.setUrlChangeListener();
     this.initTraceList();
     onLocationChange();
   }
@@ -221,8 +220,8 @@ export default class TraceExplorer extends Component<Props> {
 
     this.setState({ traceList, domain });
   }
-  initUrlChangeListener(initRequestListener: boolean = false) {
-    if (initRequestListener) {
+  setUrlChangeListener(initListener: boolean = false) {
+    if (initListener) {
       browser.devtools.network.onRequestFinished.addListener(this.requestListener);
     }
     browser.devtools.network.onNavigated.addListener(this.reloadListener);
@@ -230,14 +229,16 @@ export default class TraceExplorer extends Component<Props> {
 
     browser.devtools.inspectedWindow.eval(`(${dispatchEventOnNavigation.toString()})()`);
 
-    browser.scripting.executeScript({
-      target: { tabId: browser.devtools.inspectedWindow.tabId },
-      func: sendMessageOnNavigationEvent
-    });
+    if (initListener) {
+      browser.scripting.executeScript({
+        target: { tabId: browser.devtools.inspectedWindow.tabId },
+        func: sendMessageOnNavigationEvent
+      });
+    }
   }
   async componentDidMount() {
     this.initTraceList();
-    this.initUrlChangeListener(true);
+    this.setUrlChangeListener(true);
   }
 
   componentWillUnmount(): void {

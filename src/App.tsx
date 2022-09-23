@@ -1,6 +1,6 @@
 import { Modal, Spinner } from "@salesforce/design-system-react";
 import React, { Component, ReactNode } from "react";
-import { Browser, Cookies } from "webextension-polyfill";
+import { Browser, Cookies, Runtime } from "webextension-polyfill";
 import DebugInformation from "./components/DebugInformation";
 import ManageTrace from "./components/ManageTrace";
 import TraceExplorer from "./components/TraceExplorer";
@@ -23,22 +23,48 @@ interface AppState {
   sfApi?: Connection;
   externalUserId?: string;
   traceActiveUntil?: Date;
+  port?: Runtime.Port;
 }
 
 class App extends Component<Props, AppState> {
   state: AppState = {};
+  constructor(props: Props) {
+    super(props);
+    this.changeDomainListener = this.changeDomainListener.bind(this);
+  }
   cookieChangeListener = ({ cookie }: Cookies.OnChangedChangeInfoType) => {
     if (["RRetURL", "sid"].includes(cookie.name)) {
+      this.bootstrapApp();
+    }
+  }
+  changeDomainListener (url: string) {
+    const {currentDomain} = this.state;
+
+    const urlObject = new URL(url);
+
+    if (currentDomain !== urlObject.hostname) {
       this.bootstrapApp();
     }
   }
   componentDidMount() {
     this.bootstrapApp();
 
-    browser.cookies.onChanged.addListener(this.cookieChangeListener);
+    const port = browser.runtime.connect({name: 'cookie-change-listener'});
+
+    port.onMessage.addListener(this.cookieChangeListener);
+
+    browser.devtools.network.onNavigated.addListener(this.changeDomainListener);
+
+    this.setState({port});
   }
   componentWillUnmount(): void {
-    browser.cookies.onChanged.removeListener(this.cookieChangeListener);
+    const {port} = this.state;
+
+    if (port) {
+      port.disconnect();
+    }
+
+    browser.devtools.network.onNavigated.removeListener(this.changeDomainListener);
   }
   async bootstrapApp() {
     this.setState({
@@ -47,12 +73,18 @@ class App extends Component<Props, AppState> {
 
     const [currentLocation] = await browser.devtools.inspectedWindow.eval("location.href");
 
+    if (!currentLocation) {
+      return this.setState({
+        sfApi: undefined
+      });
+    }
+
     const currentLocationUrl = new URL(currentLocation);
     this.setState({
       currentDomain: currentLocationUrl.hostname
     })
 
-    const loggedAsCookie = await browser.cookies.get({ name: "RRetURL", url: currentLocation });
+    const loggedAsCookie = await browser.runtime.sendMessage({type: 'getCookie', data: { name: "RRetURL", url: currentLocation }});
 
     if (loggedAsCookie === null) {
       return this.setState({
@@ -68,7 +100,7 @@ class App extends Component<Props, AppState> {
     const instanceUrl = salesforceLoggedAsUrl.hostname;
     const externalContactId = salesforceLoggedAsUrl.pathname.substring(1);
 
-    const salesforceSessionCookie = await browser.cookies.get({ url: loggedAsCookie.value, name: "sid" });
+    const salesforceSessionCookie = await browser.runtime.sendMessage({type: 'getCookie', data: { url: loggedAsCookie.value, name: "sid" }});
 
     if (salesforceSessionCookie === null) {
       return this.setState({

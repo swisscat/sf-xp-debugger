@@ -5,18 +5,19 @@
   "icons": {
     "128": "icon.png"
   },
-  "manifest_version": 3,
+  "manifest_version": 2,
   "devtools_page": "devtools.html",
   "permissions": [
     "cookies",
     "downloads",
     "scripting",
-    "storage"
-  ],
-  "host_permissions": [
+    "storage",
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "scripts": [
+      "lib/browser-polyfill.min.js",
+      "background.js"
+    ]
   }
 }
