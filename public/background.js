@@ -1,3 +1,9 @@
+try {
+  importScripts('lib/browser-polyfill.min.js');
+} catch (err) {
+  console.error(err);
+}
+
 browser.runtime.onMessage.addListener(async (event) => {
   switch (event.type) {
     case 'getCookie':

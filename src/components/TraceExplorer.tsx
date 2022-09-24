@@ -102,20 +102,21 @@ export default class TraceExplorer extends Component<Props> {
   getStorageKey(domain: string): string {
     return `traceList.${domain}`;
   }
-  async getBrowserStorage (domain: string): Promise<Array<Trace>> {
+  async getBrowserStorage(domain: string): Promise<Array<Trace>> {
     const storageKey = this.getStorageKey(domain);
-    const storage = await browser.storage.local.get(storageKey);
+
+    const storage = browser.runtime.id !== undefined ? await browser.storage.local.get(storageKey) : {};
 
     return storage[storageKey] || [];
   }
   async setBrowserStorage(domain: string, traceList: Array<Trace>) {
-    const storage: {[key: string]: Array<Trace>} = {};
+    const storage: { [key: string]: Array<Trace> } = {};
     storage[this.getStorageKey(domain)] = traceList;
     return browser.storage.local.set(storage);
   }
   deleteBrowserStorage(domain?: string) {
     domain && browser.storage.local.remove(this.getStorageKey(domain))
-  } 
+  }
   requestListener = async (request: unknown) => {
     const { traceActiveUntil, sfApi } = this.props;
     const { traceList, domain } = this.state;
@@ -208,15 +209,30 @@ export default class TraceExplorer extends Component<Props> {
     const domain = currentLocation.hostname;
 
     if (flush) {
+      const { traceList } = this.state;
+      const { sfApi } = this.props;
+
+      const allSalesforceRequests = ([] as Array<SalesforceRequest>).concat.apply(
+        [],
+        traceList.map((trace) => allNodes(trace.stack))
+      );
+
+      const allRequestIds = allSalesforceRequests.map(request => `TID:${request.requestId}`)
+
+      await sfApi.sobject('ApexLog').find({ RequestIdentifier: allRequestIds }).destroy();
       await this.deleteBrowserStorage(domain);
     }
 
     const traceList = await this.getBrowserStorage(domain);
 
-    traceList.push({
-      url: currentLocation.href.substring(currentLocation.origin.length),
-      stack: []
-    })
+    const currentTraceUrl = currentLocation.href.substring(currentLocation.origin.length);
+
+    if (!traceList.length || traceList[traceList.length - 1].url !== currentTraceUrl) {
+      traceList.push({
+        url: currentTraceUrl,
+        stack: []
+      })
+    }
 
     this.setState({ traceList, domain });
   }
@@ -229,7 +245,7 @@ export default class TraceExplorer extends Component<Props> {
 
     browser.devtools.inspectedWindow.eval(`(${dispatchEventOnNavigation.toString()})()`);
 
-    if (initListener) {
+    if (initListener && browser.runtime.id !== undefined) {
       browser.scripting.executeScript({
         target: { tabId: browser.devtools.inspectedWindow.tabId },
         func: sendMessageOnNavigationEvent

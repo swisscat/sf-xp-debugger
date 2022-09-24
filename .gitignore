@@ -9,6 +9,7 @@
 # development
 /build
 extension.zip
+/profile
 
 # installed files
 public/lib

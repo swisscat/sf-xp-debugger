@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { Connection, SfDate } from "jsforce";
+import { Connection } from "jsforce";
 import { Button, Card, ScopedNotification, Spinner } from "@salesforce/design-system-react";
+const jsforce = require("jsforce/build/jsforce");
 
 interface Props {
   sfApi: Connection;
@@ -52,7 +53,7 @@ export default class ManageTrace extends Component<Props, State> {
     const activeTrace = (await sfApi.tooling.sobject("TraceFlag").findOne(
       {
         TracedEntityId: externalUserId,
-        ExpirationDate: { $gte: SfDate.toDateTimeLiteral(new Date()) },
+        ExpirationDate: { $gte: jsforce.SfDate.toDateTimeLiteral(new Date()) },
       },
       ["ExpirationDate"]
     )) as Trace;
@@ -77,14 +78,14 @@ export default class ManageTrace extends Component<Props, State> {
     existingTrace
       ? await sfApi.tooling.sobject("TraceFlag").update({
         Id: existingTrace.Id,
-        StartDate: SfDate.toDateTimeLiteral(new Date()),
-        ExpirationDate: SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
+        StartDate: jsforce.SfDate.toDateTimeLiteral(new Date()),
+        ExpirationDate: jsforce.SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
         DebugLevelId: debugLevelId,
       })
         .catch((err) => this.handleError(err))
       : await sfApi.tooling.sobject("TraceFlag").create({
-        StartDate: SfDate.toDateTimeLiteral(new Date()),
-        ExpirationDate: SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
+        StartDate: jsforce.SfDate.toDateTimeLiteral(new Date()),
+        ExpirationDate: jsforce.SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
         DebugLevelId: debugLevelId,
         LogType: "USER_DEBUG",
         TracedEntityId: externalUserId,
@@ -109,7 +110,7 @@ export default class ManageTrace extends Component<Props, State> {
       <div>
         <ScopedNotification theme="dark" className={`slds-theme_${error ? "error" : activeTrace ? "success" : "warning"}`}>
           {error ? <p>{error}</p> : activeTrace ? (
-            <p>Trace activated until {SfDate.parseDate(activeTrace.ExpirationDate).toLocaleString()}</p>
+            <p>Trace activated until {jsforce.SfDate.parseDate(activeTrace.ExpirationDate).toLocaleString()}</p>
           ) : (
             <p>No active trace found. Please select one below</p>
           )}

@@ -18,9 +18,9 @@ It makes use of https://github.com/financialforcedev/debug-log-analyzer to displ
 ### Chrome
  * Download repository
  * `npm install`
- * `npm run dev:chrome`
- * Load extension as unpacked from the `build` folder
+ * `npm run watch`
 
+> :warning: **Do not forget to close the web browser if you stop watch**: You will face ECONNREFUSED when starting again otherwise.
 
 ### Firefox
  * Download repository
@@ -35,3 +35,5 @@ Agent icons created by Freepik - Flaticon: https://www.flaticon.com/free-icons/a
 ## TODO
 
 * Delete logs on flush
+* Use web-ext on chrome + firefox with saved profile in ignored folder
+* Use react-scripts v5 with correct config

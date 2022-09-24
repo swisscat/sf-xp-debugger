@@ -5,7 +5,8 @@ import DebugInformation from "./components/DebugInformation";
 import ManageTrace from "./components/ManageTrace";
 import TraceExplorer from "./components/TraceExplorer";
 import Tabs from "./layout/Tabs";
-import { Connection, SfDate } from "jsforce";
+import { Connection } from "jsforce";
+const jsforce = require("jsforce/build/jsforce");
 
 declare var browser: Browser;
 
@@ -37,8 +38,8 @@ class App extends Component<Props, AppState> {
       this.bootstrapApp();
     }
   }
-  changeDomainListener (url: string) {
-    const {currentDomain} = this.state;
+  changeDomainListener(url: string) {
+    const { currentDomain } = this.state;
 
     const urlObject = new URL(url);
 
@@ -49,16 +50,16 @@ class App extends Component<Props, AppState> {
   componentDidMount() {
     this.bootstrapApp();
 
-    const port = browser.runtime.connect({name: 'cookie-change-listener'});
+    const port = browser.runtime.connect({ name: 'cookie-change-listener' });
 
     port.onMessage.addListener(this.cookieChangeListener);
 
     browser.devtools.network.onNavigated.addListener(this.changeDomainListener);
 
-    this.setState({port});
+    this.setState({ port });
   }
   componentWillUnmount(): void {
-    const {port} = this.state;
+    const { port } = this.state;
 
     if (port) {
       port.disconnect();
@@ -84,7 +85,7 @@ class App extends Component<Props, AppState> {
       currentDomain: currentLocationUrl.hostname
     })
 
-    const loggedAsCookie = await browser.runtime.sendMessage({type: 'getCookie', data: { name: "RRetURL", url: currentLocation }});
+    const loggedAsCookie = await browser.runtime.sendMessage({ type: 'getCookie', data: { name: "RRetURL", url: currentLocation } });
 
     if (loggedAsCookie === null) {
       return this.setState({
@@ -100,7 +101,7 @@ class App extends Component<Props, AppState> {
     const instanceUrl = salesforceLoggedAsUrl.hostname;
     const externalContactId = salesforceLoggedAsUrl.pathname.substring(1);
 
-    const salesforceSessionCookie = await browser.runtime.sendMessage({type: 'getCookie', data: { url: loggedAsCookie.value, name: "sid" }});
+    const salesforceSessionCookie = await browser.runtime.sendMessage({ type: 'getCookie', data: { url: loggedAsCookie.value, name: "sid" } });
 
     if (salesforceSessionCookie === null) {
       return this.setState({
@@ -112,7 +113,7 @@ class App extends Component<Props, AppState> {
     }
 
     const sessionId = salesforceSessionCookie.value;
-    const sfApi = new Connection({ instanceUrl: `https://${instanceUrl}`, sessionId, version: "55.0" });
+    const sfApi: Connection = new jsforce.Connection({ instanceUrl: `https://${instanceUrl}`, sessionId, version: "55.0" });
 
     let externalUser;
 
@@ -142,10 +143,10 @@ class App extends Component<Props, AppState> {
 
     const activeTrace = await sfApi.tooling
       .sobject("TraceFlag")
-      .findOne({ TracedEntityId: externalUserId, ExpirationDate: { $gte: SfDate.toDateTimeLiteral(new Date()) } }, ["ExpirationDate"]) as TraceFlag
+      .findOne({ TracedEntityId: externalUserId, ExpirationDate: { $gte: jsforce.SfDate.toDateTimeLiteral(new Date()) } }, ["ExpirationDate"]) as TraceFlag
 
     if (activeTrace) {
-      traceActiveUntil = SfDate.parseDate(activeTrace.ExpirationDate);
+      traceActiveUntil = jsforce.SfDate.parseDate(activeTrace.ExpirationDate);
     }
 
     this.setState({
