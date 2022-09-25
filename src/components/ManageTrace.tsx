@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { Connection, SfDate } from "jsforce";
+import { Connection } from "jsforce";
 import { Button, Card, ScopedNotification, Spinner } from "@salesforce/design-system-react";
+const { SfDate } = require("jsforce/build/jsforce");
 
 interface Props {
   sfApi: Connection;
@@ -24,6 +25,7 @@ interface State {
   debugLevels: Array<DebugLevel>;
   loaded: boolean;
   activeTrace?: Trace;
+  error?: string;
 }
 
 export default class ManageTrace extends Component<Props, State> {
@@ -42,6 +44,7 @@ export default class ManageTrace extends Component<Props, State> {
     this.setState({
       debugLevels,
       loaded: true,
+      error: undefined
     });
   }
   async loadActiveTrace() {
@@ -58,7 +61,11 @@ export default class ManageTrace extends Component<Props, State> {
     this.setState({
       loaded: true,
       activeTrace,
+      error: undefined
     });
+  }
+  handleError(err: any) {
+    this.setState({ error: err.toString() });
   }
   async createTrace(debugLevelId: string) {
     const { onTraceChange, sfApi, externalUserId } = this.props;
@@ -70,18 +77,20 @@ export default class ManageTrace extends Component<Props, State> {
 
     existingTrace
       ? await sfApi.tooling.sobject("TraceFlag").update({
-          Id: existingTrace.Id,
-          StartDate: SfDate.toDateTimeLiteral(new Date()),
-          ExpirationDate: SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
-          DebugLevelId: debugLevelId,
-        })
+        Id: existingTrace.Id,
+        StartDate: SfDate.toDateTimeLiteral(new Date()),
+        ExpirationDate: SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
+        DebugLevelId: debugLevelId,
+      })
+        .catch((err) => this.handleError(err))
       : await sfApi.tooling.sobject("TraceFlag").create({
-          StartDate: SfDate.toDateTimeLiteral(new Date()),
-          ExpirationDate: SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
-          DebugLevelId: debugLevelId,
-          LogType: "USER_DEBUG",
-          TracedEntityId: externalUserId,
-        });
+        StartDate: SfDate.toDateTimeLiteral(new Date()),
+        ExpirationDate: SfDate.toDateTimeLiteral(new Date(Date.now() + 15 * 60 * 1000)),
+        DebugLevelId: debugLevelId,
+        LogType: "USER_DEBUG",
+        TracedEntityId: externalUserId,
+      })
+        .catch((err) => this.handleError(err));
 
     onTraceChange();
   }
@@ -91,7 +100,7 @@ export default class ManageTrace extends Component<Props, State> {
     }
   }
   render() {
-    const { debugLevels, loaded, activeTrace } = this.state;
+    const { debugLevels, loaded, activeTrace, error } = this.state;
 
     if (!loaded) {
       return <Spinner size="medium" variant="brand" />;
@@ -99,8 +108,8 @@ export default class ManageTrace extends Component<Props, State> {
 
     return (
       <div>
-        <ScopedNotification theme="dark" className={`slds-theme_${activeTrace ? "success" : "warning"}`}>
-          {activeTrace ? (
+        <ScopedNotification theme="dark" className={`slds-theme_${error ? "error" : activeTrace ? "success" : "warning"}`}>
+          {error ? <p>{error}</p> : activeTrace ? (
             <p>Trace activated until {SfDate.parseDate(activeTrace.ExpirationDate).toLocaleString()}</p>
           ) : (
             <p>No active trace found. Please select one below</p>

@@ -8,7 +8,8 @@
 
 # development
 /build
-extension.zip
+/profile
+extension-*.zip
 
 # installed files
 public/lib

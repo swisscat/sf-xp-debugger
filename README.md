@@ -6,7 +6,7 @@ Cross-browser extension providing capability to debug traces directly in the bro
 
 ## [:pushpin: Add to Chrome](https://chrome.google.com/webstore/detail/salesforce-experience-clo/gbhgnplfajpgpdiflbpfllfolnamcnac)
 
-The extension is developed as cross-browser, but has been only tested on Chrome.
+The extension is developed as cross-browser, but has been only tested on Chrome. Firefox will be added soon.
 
 It makes use of https://github.com/financialforcedev/debug-log-analyzer to display log information.
 
@@ -15,11 +15,16 @@ It makes use of https://github.com/financialforcedev/debug-log-analyzer to displ
 
 ## Development
 
-## Installation
+### Chrome
  * Download repository
  * `npm install`
- * `npm run build`
- * Load extension as unpacked from the `build` folder
+ * `npm run start:chrome`
+
+### Firefox
+ * Download repository
+ * `npm install`
+ * `npm run start:firefox`
+
 ## Icon
 
 Agent icons created by Freepik - Flaticon: https://www.flaticon.com/free-icons/agent

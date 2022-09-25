@@ -1,44 +1,55 @@
 {
   "name": "sf-xp-debugger",
-  "version": "0.2.0",
+  "version": "1.3.0",
   "dependencies": {
-    "@salesforce-ux/design-system": "^2.19",
+    "@salesforce-ux/design-system": "^2.19.0",
     "@salesforce/design-system-react": "^0.10.48",
-    "@types/har-format": "^1.2.8",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/jsforce": "^1.9.43",
-    "@types/react": "^18.0.19",
+    "@types/node": "^16.11.59",
+    "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
-    "@types/webextension-polyfill": "^0.9.0",
     "jsforce": "^1.11.0",
     "logviewer": "https://gitpkg.now.sh/swisscat/debug-log-analyzer/log-viewer?main&scripts.postinstall=npm%20install%20--ignore-scripts%20%26%26%20npm%20run%20build",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "^3.4.4",
-    "typescript": "^3.7.5",
+    "react-scripts": "5.0.1",
+    "typescript": "^4.8.3",
     "webextension-polyfill": "^0.10.0"
   },
-  "devDependencies": {
-    "bestzip": "^2.2.1",
-    "cra-build-watch": "3.4",
-    "postinstall": "^0.7.4",
-    "serve": "^11.0.1"
-  },
   "scripts": {
-    "watch": "cra-build-watch",
-    "start": "react-scripts start",
-    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build",
-    "serve": "serve -s build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "postinstall": "postinstall",
-    "zip": "bestzip extension.zip build/*"
+    "start:chrome": "REACT_APP_EXT_BUILD=chrome BROWSER=none craco start",
+    "build:chrome": "REACT_APP_EXT_BUILD=chrome INLINE_RUNTIME_CHUNK=false craco build && rimraf extension-chrome.zip && cd build/chrome && bestzip ../../extension-chrome.zip *",
+    "start:firefox": "REACT_APP_EXT_BUILD=firefox BROWSER=none craco start",
+    "build:firefox": "REACT_APP_EXT_BUILD=firefox INLINE_RUNTIME_CHUNK=false craco build && rimraf extension-firefox.zip && cd build/firefox && bestzip ../../extension-firefox.zip *",
+    "postinstall": "postinstall"
   },
   "postinstall": {
-    "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css": "link public/lib/",
-    "@salesforce-ux/design-system/assets/icons": "link public/lib/",
-    "webextension-polyfill/dist/browser-polyfill.min.*": "link public/lib/",
+    "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css": "copy public/lib/",
+    "@salesforce-ux/design-system/assets/icons": "copy public/lib/",
+    "webextension-polyfill/dist/browser-polyfill.min.*": "copy public/lib/",
     "logviewer/out/*": "copy public/lib/logviewer/"
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.0.0-alpha.7",
+    "@types/har-format": "^1.2.8",
+    "@types/jsforce": "^1.9.43",
+    "@types/webextension-polyfill": "^0.9.1",
+    "bestzip": "^2.2.1",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "csv-parse": "^5.3.0",
+    "postinstall": "^0.7.4",
+    "rimraf": "^3.0.2",
+    "web-ext-plugin-cjs": "^2.2.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
