@@ -6,11 +6,13 @@ import ManageTrace from "./components/ManageTrace";
 import TraceExplorer from "./components/TraceExplorer";
 import Tabs from "./layout/Tabs";
 import { Connection } from "jsforce";
-const jsforce = require("jsforce/build/jsforce");
+const { SfDate, Connection: _Connection } = require("jsforce/build/jsforce");
 
 declare var browser: Browser;
 
-interface Props { }
+interface Props {
+  build: string
+}
 
 interface TraceFlag {
   ExpirationDate: string;
@@ -68,6 +70,7 @@ class App extends Component<Props, AppState> {
     browser.devtools.network.onNavigated.removeListener(this.changeDomainListener);
   }
   async bootstrapApp() {
+    const { build } = this.props;
     this.setState({
       error: undefined
     })
@@ -83,9 +86,11 @@ class App extends Component<Props, AppState> {
     const currentLocationUrl = new URL(currentLocation);
     this.setState({
       currentDomain: currentLocationUrl.hostname
-    })
+    });
 
-    const loggedAsCookie = await browser.runtime.sendMessage({ type: 'getCookie', data: { name: "RRetURL", url: currentLocation } });
+    const loggedAsCookie = build === 'chrome'
+      ? await browser.cookies.get({ name: "RRetURL", url: currentLocation })
+      : await browser.runtime.sendMessage({ type: 'getCookie', data: { name: "RRetURL", url: currentLocation } });
 
     if (loggedAsCookie === null) {
       return this.setState({
@@ -101,7 +106,9 @@ class App extends Component<Props, AppState> {
     const instanceUrl = salesforceLoggedAsUrl.hostname;
     const externalContactId = salesforceLoggedAsUrl.pathname.substring(1);
 
-    const salesforceSessionCookie = await browser.runtime.sendMessage({ type: 'getCookie', data: { url: loggedAsCookie.value, name: "sid" } });
+    const salesforceSessionCookie = build === 'chrome'
+      ? await browser.cookies.get({ url: loggedAsCookie.value, name: "sid" })
+      : await browser.runtime.sendMessage({ type: 'getCookie', data: { url: loggedAsCookie.value, name: "sid" } });
 
     if (salesforceSessionCookie === null) {
       return this.setState({
@@ -113,7 +120,7 @@ class App extends Component<Props, AppState> {
     }
 
     const sessionId = salesforceSessionCookie.value;
-    const sfApi: Connection = new jsforce.Connection({ instanceUrl: `https://${instanceUrl}`, sessionId, version: "55.0" });
+    const sfApi: Connection = new _Connection({ instanceUrl: `https://${instanceUrl}`, sessionId, version: "55.0" });
 
     let externalUser;
 
@@ -143,10 +150,10 @@ class App extends Component<Props, AppState> {
 
     const activeTrace = await sfApi.tooling
       .sobject("TraceFlag")
-      .findOne({ TracedEntityId: externalUserId, ExpirationDate: { $gte: jsforce.SfDate.toDateTimeLiteral(new Date()) } }, ["ExpirationDate"]) as TraceFlag
+      .findOne({ TracedEntityId: externalUserId, ExpirationDate: { $gte: SfDate.toDateTimeLiteral(new Date()) } }, ["ExpirationDate"]) as TraceFlag
 
     if (activeTrace) {
-      traceActiveUntil = jsforce.SfDate.parseDate(activeTrace.ExpirationDate);
+      traceActiveUntil = SfDate.parseDate(activeTrace.ExpirationDate);
     }
 
     this.setState({

@@ -18,15 +18,12 @@ It makes use of https://github.com/financialforcedev/debug-log-analyzer to displ
 ### Chrome
  * Download repository
  * `npm install`
- * `npm run watch`
+ * `npm run start:chrome`
 
-> :warning: **Do not forget to close the web browser if you stop watch**: You will face ECONNREFUSED when starting again otherwise.
-
-### Firefox
+### Firefox (NOT READY)
  * Download repository
  * `npm install`
- * `npm run dev:chrome`
- * `npm run dev:firefox` ONCE chrome is watching. Keep in mind that any changes to the manifest.json will require this command to be reloaded!
+ * `npm run start:firefox`
 
 ## Icon
 
@@ -34,6 +31,5 @@ Agent icons created by Freepik - Flaticon: https://www.flaticon.com/free-icons/a
 
 ## TODO
 
-* Delete logs on flush
 * Use web-ext on chrome + firefox with saved profile in ignored folder
-* Use react-scripts v5 with correct config
+* Remove errors on Chrome technical pages

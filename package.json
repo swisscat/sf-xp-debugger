@@ -20,16 +20,10 @@
     "webextension-polyfill": "^0.10.0"
   },
   "scripts": {
-    "watch": "npm-run-all --parallel watch:*",
+    "start:chrome": "REACT_APP_EXT_BUILD=chrome BROWSER=none craco start",
     "build": "INLINE_RUNTIME_CHUNK=false craco build",
     "test": "craco test",
-    "postinstall": "postinstall",
-    "zip": "bestzip extension.zip build/*",
-    "clean": "",
-    "watch:react": "BROWSER=none craco start",
-    "watch:public": "cpx \"public/!(index.html)\" build --watch --clean",
-    "watch:public-subfolders": "cpx \"public/!(index.html)/**\" build --watch --clean",
-    "watch:web-ext": "sleep 3 && mkdir -p profile/chromium && web-ext run -t chromium -s build --chromium-profile profile/chromium --keep-profile-changes"
+    "postinstall": "postinstall"
   },
   "postinstall": {
     "@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css": "copy public/lib/",
@@ -42,13 +36,11 @@
     "@types/har-format": "^1.2.8",
     "@types/jsforce": "^1.9.43",
     "@types/webextension-polyfill": "^0.9.1",
-    "bestzip": "^2.2.1",
+    "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^11.0.0",
-    "cpx": "^1.5.0",
     "csv-parse": "^5.3.0",
-    "npm-run-all": "^4.1.5",
     "postinstall": "^0.7.4",
-    "web-ext": "^7.2.0"
+    "web-ext-plugin-cjs": "^2.2.0"
   },
   "eslintConfig": {
     "extends": [
