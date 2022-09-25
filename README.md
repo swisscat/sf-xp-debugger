@@ -20,7 +20,7 @@ It makes use of https://github.com/financialforcedev/debug-log-analyzer to displ
  * `npm install`
  * `npm run start:chrome`
 
-### Firefox (NOT READY)
+### Firefox
  * Download repository
  * `npm install`
  * `npm run start:firefox`
@@ -28,8 +28,3 @@ It makes use of https://github.com/financialforcedev/debug-log-analyzer to displ
 ## Icon
 
 Agent icons created by Freepik - Flaticon: https://www.flaticon.com/free-icons/agent
-
-## TODO
-
-* Use web-ext on chrome + firefox with saved profile in ignored folder
-* Remove errors on Chrome technical pages

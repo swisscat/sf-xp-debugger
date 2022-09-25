@@ -45,6 +45,7 @@ const generateManifest = (build: string, content: Buffer) => {
 
 module.exports = async () => {
   const build = process.env.REACT_APP_EXT_BUILD || 'chrome';
+  const target = build === 'chrome' ? 'chromium' : 'firefox-desktop';
 
   const copyPatterns = [
     {
@@ -80,11 +81,13 @@ module.exports = async () => {
           patterns: copyPatterns
         }),
         new WebExtPlugin({
-          sourceDir: 'build/chrome',
-          target: 'chromium',
+          sourceDir: path.resolve(`build/${build}`),
+          target: target,
           runLint: false,
-          chromiumProfile: 'profile/chromium',
-          keepProfileChanges: true
+          chromiumProfile: `profile/${target}`,
+          firefoxProfile: `profile/${target}`,
+          keepProfileChanges: true,
+          profileCreateIfMissing: true
         })
       ]
     }

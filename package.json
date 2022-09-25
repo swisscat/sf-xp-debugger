@@ -21,8 +21,9 @@
   },
   "scripts": {
     "start:chrome": "REACT_APP_EXT_BUILD=chrome BROWSER=none craco start",
-    "build": "INLINE_RUNTIME_CHUNK=false craco build",
-    "test": "craco test",
+    "build:chrome": "REACT_APP_EXT_BUILD=chrome INLINE_RUNTIME_CHUNK=false craco build && rimraf extension-chrome.zip && cd build/chrome && bestzip ../../extension-chrome.zip *",
+    "start:firefox": "REACT_APP_EXT_BUILD=firefox BROWSER=none craco start",
+    "build:firefox": "REACT_APP_EXT_BUILD=firefox INLINE_RUNTIME_CHUNK=false craco build && rimraf extension-firefox.zip && cd build/firefox && bestzip ../../extension-firefox.zip *",
     "postinstall": "postinstall"
   },
   "postinstall": {
@@ -36,10 +37,12 @@
     "@types/har-format": "^1.2.8",
     "@types/jsforce": "^1.9.43",
     "@types/webextension-polyfill": "^0.9.1",
+    "bestzip": "^2.2.1",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^11.0.0",
     "csv-parse": "^5.3.0",
     "postinstall": "^0.7.4",
+    "rimraf": "^3.0.2",
     "web-ext-plugin-cjs": "^2.2.0"
   },
   "eslintConfig": {
@@ -59,10 +62,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "webExt": {
-    "verbose": true,
-    "sourceDir": "build"
   },
   "bugs": {
     "url": "https://github.com/swisscat/sf-xp-debugger/issues"

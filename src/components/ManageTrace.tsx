@@ -65,7 +65,7 @@ export default class ManageTrace extends Component<Props, State> {
     });
   }
   handleError(err: any) {
-    this.setState({error: err.toString()});
+    this.setState({ error: err.toString() });
   }
   async createTrace(debugLevelId: string) {
     const { onTraceChange, sfApi, externalUserId } = this.props;
