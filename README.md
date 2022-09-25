@@ -6,9 +6,7 @@ Cross-browser extension providing capability to debug traces directly in the bro
 
 ## [:pushpin: Add to Chrome](https://chrome.google.com/webstore/detail/salesforce-experience-clo/gbhgnplfajpgpdiflbpfllfolnamcnac) [:pushpin: Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/sf-xp-cloud-debugger/)
 
-The extension is developed as cross-browser, but has been only tested on Chrome. Firefox will be added soon.
-
-It makes use of https://github.com/financialforcedev/debug-log-analyzer to display log information.
+The extension makes use of https://github.com/financialforcedev/debug-log-analyzer to display log information, but displays it directly in Developer Tools instead of requiring to download the code & open VS Code.
 
 ![Request Example](assets/request-example.png "Request Example")
 ![Request Example](assets/stack-example.png "Stack Example")
