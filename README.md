@@ -4,7 +4,7 @@ Cross-browser extension providing capability to debug traces directly in the bro
 
 [![Build Status](https://app.travis-ci.com/swisscat/sf-xp-debugger.svg?branch=master)](https://app.travis-ci.com/swisscat/sf-xp-debugger)
 
-## [:pushpin: Add to Chrome](https://chrome.google.com/webstore/detail/salesforce-experience-clo/gbhgnplfajpgpdiflbpfllfolnamcnac)
+## [:pushpin: Add to Chrome](https://chrome.google.com/webstore/detail/salesforce-experience-clo/gbhgnplfajpgpdiflbpfllfolnamcnac) [:pushpin: Add to Firefox](https://addons.mozilla.org/en-US/firefox/addon/sf-xp-cloud-debugger/)
 
 The extension is developed as cross-browser, but has been only tested on Chrome. Firefox will be added soon.
 
